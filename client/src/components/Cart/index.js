@@ -1,15 +1,32 @@
-import React from 'react';
+import React, { useEffect } from "react";
 import CartItem from '../CartItem';
 import Auth from '../../utils/auth';
 import './style.css';
 import { useStoreContext } from '../../utils/GlobalState';
-import { TOGGLE_CART } from '../../utils/actions';
+import { TOGGLE_CART, ADD_MULTIPLE_TO_CART } from "../../utils/actions";
+// indexDB
+import { idbPromise } from "../../utils/helpers";
 
 
 const Cart = () => {
 
-    // Toggle Cart
+
+
+
     const [state, dispatch] = useStoreContext();
+    // IndexDB
+    useEffect(() => {
+        async function getCart() {
+            const cart = await idbPromise('cart', 'get');
+            dispatch({ type: ADD_MULTIPLE_TO_CART, products: [...cart] });
+        };
+
+        if (!state.cart.length) {
+            getCart();
+        }
+    }, [state.cart.length, dispatch]);
+
+    // Toggle Cart
     function toggleCart() {
         dispatch({ type: TOGGLE_CART });
     }
@@ -24,6 +41,8 @@ const Cart = () => {
     }
     // END Toggle Cart
 
+
+
     // add up the prices
     function calculateTotal() {
         let sum = 0;
@@ -33,7 +52,7 @@ const Cart = () => {
         return sum.toFixed(2);
     }
 
-    console.log(state)
+
 
 
     return (
